@@ -1,3 +1,4 @@
 # lambdago
 
-Dev example of localstack & lambda & golang
+Dev example of localstack & lambda & golang (& kinesis)
+
