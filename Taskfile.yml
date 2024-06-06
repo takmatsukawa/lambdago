@@ -1,0 +1,43 @@
+version: '3'
+
+vars:
+  PORT: 8546
+  FUNCTION_NAME: lambdago
+
+tasks:
+  up:
+    desc: "Launch localstack."
+    cmds:
+      - task: _build
+      - docker-compose up -d
+
+  down:
+    desc: "Stop localstack."
+    cmds:
+      - docker-compose down
+
+  update:
+    desc: "Update Lambda bin."
+    cmds:
+      - task: _build
+
+  invoke:
+    desc: "Invoke Lambda."
+    cmds:
+      - awslocal lambda invoke --endpoint-url http://localhost:{{.PORT}} --function-name {{.FUNCTION_NAME}} --invocation-type Event --payload file://kinesis/invoke-payload.json --cli-binary-format raw-in-base64-out /dev/stdout
+
+  logs:
+    desc: "Show logs."
+    cmds:
+      - awslocal logs tail --follow /aws/lambda/{{.FUNCTION_NAME}} --endpoint-url=http://localhost:{{.PORT}}
+
+  logs-docker:
+    desc: "Show logs in Docker."
+    cmds:
+      - docker logs -f $(docker ps -a | grep localstack/localstack | cut -f 1 -d " ")
+
+  _build:
+    internal: true
+    desc: "Build app."
+    cmds:
+      - CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/app .

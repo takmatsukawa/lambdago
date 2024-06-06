@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  localstack:
+    image: localstack/localstack:2.1.0
+    environment:
+      - SERVICES=lambda
+      - DEFAULT_REGION=ap-northeast-1
+      - DATA_DIR=/tmp/localstack/data
+      - LAMBDA_EXECUTOR=local
+      - LAMBDA_REMOTE_DOCKER=false
+      - PROVIDER_OVERRIDE_LAMBDA=legacy
+      - DEBUG=1
+      - HOST_TMP_FOLDER="${TMPDIR:-/tmp}/localstack"
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./bin:/go/src/lambda
+      - ./localstack/.aws:/root/.aws
+      - ./localstack/init/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+    ports:
+      - 8546:4566 # サービスへのアクセスポートは4566
